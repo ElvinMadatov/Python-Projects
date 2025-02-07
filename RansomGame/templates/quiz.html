@@ -1,0 +1,223 @@
+import tkinter as tk
+from tkinter import messagebox
+
+# Questions and answers
+questions = [
+    {
+        "question": "1. Which of the following is a common phishing technique?",
+        "options": {
+            "A) Fake emails 📧": False,
+            "B) Using secure websites 🔒": False,
+            "C) Fake login pages 🔑": True,
+            "D) Strong passwords 🔐": False,
+        },
+    },
+    {
+        "question": "2. What does 'https' stand for?",
+        "options": {
+            "A) Hyper Transfer Protocol 🕸️": False,
+            "B) HyperText Secure Protocol 🔒": False,
+            "C) HyperText Transfer Protocol Secure 🌐": True,
+            "D) Secure Socket Layer 🚀": False,
+        },
+    },
+]
+
+current_question = 0
+score = 0
+timer_running = True
+countdown_canvas = None
+answer_selected = False
+
+
+def start_countdown(seconds):
+    """Starts the countdown timer."""
+    if seconds > 0:
+        countdown_canvas.delete("all")
+        countdown_canvas.create_text(
+            100, 100, text=str(seconds), fill="white", font=("Arial", 24)
+        )
+        window.after(1000, lambda: start_countdown(seconds - 1))
+    else:
+        show_feedback()
+
+
+def show_feedback():
+    """Displays feedback after 15 seconds or when time runs out."""
+    global answer_selected, timer_running
+    if not answer_selected:
+        question = questions[current_question]
+        correct_option = [k for k, v in question["options"].items() if v][0]
+        feedback_label.config(
+            text=f"Time's Up! Correct Answer: {correct_option}",
+            bg="red",
+            fg="white",
+        )
+        timer_running = False
+        next_button.config(state="normal")
+
+
+def check_answer(selected_option):
+    """Checks the answer and shows feedback after 15 seconds."""
+    global answer_selected, timer_running, score
+    if not answer_selected:
+        answer_selected = True
+        question = questions[current_question]
+        correct_option = [k for k, v in question["options"].items() if v]
+
+        if selected_option in correct_option:
+            score += 1
+            feedback_label.config(text="✔ Correct!", bg="lime", fg="white")
+        else:
+            feedback_label.config(
+                text=f"❌ Incorrect! Correct: {', '.join(correct_option)}",
+                bg="red",
+                fg="white",
+            )
+
+        next_button.config(state="normal")
+
+
+def next_question():
+    """Loads the next question."""
+    global current_question, timer_running, answer_selected
+    current_question += 1
+    answer_selected = False
+    timer_running = True
+
+    if current_question < len(questions):
+        feedback_label.config(text="", bg="#1a1a2e")
+        display_question()
+    else:
+        messagebox.showinfo(
+            "Quiz Completed!", f"Your final score is: {score}/{len(questions)}"
+        )
+        window.destroy()
+
+
+def display_question():
+    """Displays the current question and answers."""
+    global timer_running
+    timer_running = True
+    question = questions[current_question]
+    question_label.config(text=question["question"])
+
+    # Update options
+    options = list(question["options"].keys())
+    option_a.config(text=options[0], command=lambda: check_answer(options[0]))
+    option_b.config(text=options[1], command=lambda: check_answer(options[1]))
+    option_c.config(text=options[2], command=lambda: check_answer(options[2]))
+    option_d.config(text=options[3], command=lambda: check_answer(options[3]))
+
+    countdown_canvas.delete("all")
+    start_countdown(15)
+
+
+# Game window
+window = tk.Tk()
+window.title("Cyber Security Quiz")
+window.geometry("900x700")
+window.configure(bg="#1a1a2e")
+
+# Question label
+question_label = tk.Label(
+    window,
+    text="",
+    font=("Arial", 18),
+    bg="#1a1a2e",
+    fg="white",
+    wraplength=850,
+    relief="solid",
+    borderwidth=2,
+    padx=10,
+    pady=10,
+)
+question_label.pack(pady=20)
+
+# Feedback label
+feedback_label = tk.Label(
+    window, text="", font=("Arial", 16), bg="#1a1a2e", fg="lime"
+)
+feedback_label.pack(pady=10)
+
+# Countdown canvas
+countdown_canvas = tk.Canvas(
+    window, width=200, height=200, bg="#1a1a2e", highlightthickness=0
+)
+countdown_canvas.pack(pady=10)
+
+# Button frame
+button_frame = tk.Frame(window, bg="#1a1a2e")
+button_frame.pack(pady=20)
+
+option_a = tk.Button(
+    button_frame,
+    text="",
+    font=("Arial", 14),
+    bg="#3d5af1",
+    fg="white",
+    width=40,
+    relief="solid",
+    borderwidth=2,
+    height=2,
+)
+option_a.grid(row=0, column=0, padx=15, pady=10)
+
+option_b = tk.Button(
+    button_frame,
+    text="",
+    font=("Arial", 14),
+    bg="#4caf50",
+    fg="white",
+    width=40,
+    relief="solid",
+    borderwidth=2,
+    height=2,
+)
+option_b.grid(row=0, column=1, padx=15, pady=10)
+
+option_c = tk.Button(
+    button_frame,
+    text="",
+    font=("Arial", 14),
+    bg="#ffeb3b",
+    fg="black",
+    width=40,
+    relief="solid",
+    borderwidth=2,
+    height=2,
+)
+option_c.grid(row=1, column=0, padx=15, pady=10)
+
+option_d = tk.Button(
+    button_frame,
+    text="",
+    font=("Arial", 14),
+    bg="#9c27b0",
+    fg="white",
+    width=40,
+    relief="solid",
+    borderwidth=2,
+    height=2,
+)
+option_d.grid(row=1, column=1, padx=15, pady=10)
+
+# Navigation buttons
+navigation_frame = tk.Frame(window, bg="#1a1a2e")
+navigation_frame.pack(side="bottom", pady=20)
+
+next_button = tk.Button(
+    navigation_frame,
+    text="Next",
+    font=("Arial", 14),
+    bg="#28a745",
+    fg="white",
+    state="disabled",
+    command=next_question,
+)
+next_button.grid(row=0, column=1, padx=10)
+
+# Display the first question
+display_question()
+
+window.mainloop()
